@@ -3,12 +3,15 @@ from typing import Optional, Union
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class Nav:
     Title: str
     icon: Union[ft.Image, ft.Icon, None]
     selected_icon = Union[ft.Image, ft.Icon, None]
     content: Optional[ft.Control]
+
+
 class NavBar(ft.UserControl):
     def __init__(self, page: ft.Page, contentPage: ft.Container, destinations: list[Nav] = None,
                  bgcolor: Optional[str] = None,

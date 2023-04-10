@@ -10,17 +10,17 @@ class App:
         self.page.window_title_bar_hidden = True
         self.page.padding = 0
         self.page.spacing = 0
+        self.page.window_center()
         self.page.theme_mode = ft.ThemeMode.DARK
 
-        page.fonts = {
-            "Mont": "/fonts/mont_heavydemo.ttf"
-        }
-        page.theme = ft.Theme(font_family="Mont")
+        # page.fonts = {
+        #     "Mont": "/fonts/mont_heavydemo.ttf"
+        # }
+        # page.theme = ft.Theme(font_family="Mont")
 
-        self.TopBar = TopBar(self.page, title="IPChecker", icon=ft.Image(src="icons/icons8-проводная-сеть-30.png"),
-                             height=40)
+        self.TopBar = TopBar(self.page, height=40)
 
-        self.contentPage = ft.Container(content=ft.Text("Всем привет!"), expand=1)
+        self.contentPage = ft.Container(expand=1)
         destinations = [
             Nav(Title="Интернет", icon=ft.Image(src="icons/icons8-signal-30.png", width=30, height=30),
                 content=EthernetPage()),
@@ -31,8 +31,8 @@ class App:
                 content=None),
             Nav(Title="Отчёты", icon=ft.Image(src="icons/icons8-pie-chart-report-30.png", width=30, height=30),
                 content=None),
-            Nav(Title="Панель SA", icon=ft.Image(src="icons/icons8-user-shield-30.png", width=30, height=30),
-                content=None)
+            # Nav(Title="Панель SA", icon=ft.Image(src="icons/icons8-user-shield-30.png", width=30, height=30),
+            #     content=None)
         ]
         self.NavBar = NavBar(self.page, contentPage=self.contentPage, destinations=destinations, bgcolor="#225074",
                              gradient=ft.LinearGradient(
@@ -47,7 +47,6 @@ class App:
                              ))
         self.page.add(
             ft.Stack(controls=[ft.Row(controls=[self.NavBar, self.contentPage], expand=1), self.TopBar], expand=1))
-        # self.page.add(self.TopBar, ft.Row(controls=[self.NavBar, self.contentPage], expand=1))
         self.page.update()
 
 
