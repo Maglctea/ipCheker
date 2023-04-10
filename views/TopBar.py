@@ -10,41 +10,75 @@ class TopBar(ft.UserControl):
         super().__init__(*args, **kwargs)
         self.page = page
         self.bgcolor = bgcolor
-
-    def minimize(self):
-        self.page.window_minimized = True
-        self.page.update()
-
-    def change_theme(self, control):
-        if self.page.theme_mode == ft.ThemeMode.DARK:
-            self.page.theme_mode = ft.ThemeMode.LIGHT
-            control.icon = ft.icons.DARK_MODE
-        elif self.page.theme_mode == ft.ThemeMode.LIGHT:
-            self.page.theme_mode = ft.ThemeMode.DARK
-            control.icon = ft.icons.LIGHT_MODE
-        control.update()
-        self.page.update()
+        self.ButtonsRow = ButtonsRow(self.page)
 
     def build(self):
-        Title = ft.WindowDragArea(
+        drag_area = ft.WindowDragArea(
             ft.Container(padding=10), expand=1)
-        ButtonsRow = ft.Row(controls=[
-            TopIconBarButton(icon=ft.icons.LIGHT_MODE if self.page.theme_mode == ft.ThemeMode.DARK else ft.icons.DARK_MODE,
-                         on_click=lambda e: self.change_theme(e.control)),
-            TopIconBarButton(icon=ft.icons.UPDATE),
-            TopIconBarButton(icon=ft.icons.MINIMIZE, on_click=lambda e: self.minimize()),
-            TopIconBarButton(icon=ft.icons.CLOSE, on_click=lambda e: self.page.window_close()),
-        ], alignment=ft.MainAxisAlignment.END, spacing=0)
-
-        return ft.Container(content=ft.Row(controls=[Title, ButtonsRow], expand=1), bgcolor=self.bgcolor)
+        return ft.Container(content=ft.Row(controls=[drag_area, self.ButtonsRow], expand=1), bgcolor=self.bgcolor)
 
 
 class TopIconBarButton(ft.UserControl):
     def __init__(self, icon: Optional[str] = None, on_click: Optional[Callable] = None):
         super().__init__()
-        self.style = ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=0))
-        self.icon = icon
-        self.on_click = on_click
+        self.__btn = None
+        self.__style = ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=0))
+        self.__icon = icon
+        self.__on_click = on_click
+
+    @property
+    def icon(self):
+        return self.__icon
+
+    @icon.setter
+    def icon(self, icon):
+        self.__icon = icon
+        self.__btn.icon = self.__icon
+        self.update()
+
+    def update(self):
+        self.__btn.update()
+
+    @property
+    def on_click(self):
+        return self.__on_click
+
+    @on_click.setter
+    def on_click(self, on_click: Optional[Callable]):
+        self.__on_click = on_click
+        self.__btn.on_click = self.__on_click
+        self.__btn.update()
 
     def build(self):
-        return ft.IconButton(self.icon, on_click=self.on_click, style=self.style, width=50, expand=1)
+        self.__btn = ft.IconButton(self.__icon, on_click=self.__on_click, style=self.__style, width=50, expand=1)
+        return self.__btn
+
+
+class ButtonsRow(ft.UserControl):
+    def __init__(self, page):
+        super().__init__()
+        self.page = page
+        self.minimizeBtn = TopIconBarButton(icon=ft.icons.MINIMIZE, on_click=lambda e: self.__minimize())
+        self.closeBtn = TopIconBarButton(icon=ft.icons.CLOSE, on_click=lambda e: self.page.window_close())
+        self.updateBtn = TopIconBarButton(icon=ft.icons.UPDATE)
+        self.themeBtn = TopIconBarButton(
+            icon=ft.icons.DARK_MODE if self.page.theme_mode.value == 'light' else ft.icons.LIGHT_MODE,
+            on_click=lambda e: self.change_theme('dark' if self.page.theme_mode.value == 'light' else 'light'))
+
+    def change_theme(self, theme):
+        if theme == ft.ThemeMode.LIGHT.value:
+            self.page.theme_mode = ft.ThemeMode.LIGHT
+            self.themeBtn.icon = ft.icons.DARK_MODE
+        elif theme == ft.ThemeMode.DARK.value:
+            self.page.theme_mode = ft.ThemeMode.DARK
+            self.themeBtn.icon = ft.icons.LIGHT_MODE
+        self.themeBtn.update()
+        self.page.update()
+
+    def __minimize(self):
+        self.page.window_minimized = True
+        self.page.update()
+
+    def build(self):
+        return ft.Row(controls=[self.themeBtn, self.updateBtn, self.minimizeBtn, self.closeBtn],
+                      alignment=ft.MainAxisAlignment.END, spacing=0)

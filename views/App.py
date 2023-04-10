@@ -49,6 +49,9 @@ class App:
             ft.Stack(controls=[ft.Row(controls=[self.NavBar, self.contentPage], expand=1), self.TopBar], expand=1))
         self.page.update()
 
+    def change_theme(self, theme: str):
+        self.TopBar.ButtonsRow.change_theme(theme)
+
 
 if __name__ == "__main__":
     ft.app(App, assets_dir="../resources")
