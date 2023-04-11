@@ -8,17 +8,17 @@ class TopBar(ft.UserControl):
                  bgcolor: Optional[str] = None,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.page = page
-        self.bgcolor = bgcolor
-        self.ButtonsRow = ButtonsRow(self.page)
+        self.__page = page
+        self.__bgcolor = bgcolor
+        self.Buttons = ButtonsRow(self.__page)
 
     def build(self):
         drag_area = ft.WindowDragArea(
             ft.Container(padding=10), expand=1)
-        return ft.Container(content=ft.Row(controls=[drag_area, self.ButtonsRow], expand=1), bgcolor=self.bgcolor)
+        return ft.Container(content=ft.Row(controls=[drag_area, self.Buttons], expand=1), bgcolor=self.__bgcolor)
 
 
-class TopIconBarButton(ft.UserControl):
+class TopBarIconButton(ft.UserControl):
     def __init__(self, icon: Optional[str] = None, on_click: Optional[Callable] = None):
         super().__init__()
         self.__btn = None
@@ -58,10 +58,10 @@ class ButtonsRow(ft.UserControl):
     def __init__(self, page):
         super().__init__()
         self.page = page
-        self.minimizeBtn = TopIconBarButton(icon=ft.icons.MINIMIZE, on_click=lambda e: self.__minimize())
-        self.closeBtn = TopIconBarButton(icon=ft.icons.CLOSE, on_click=lambda e: self.page.window_close())
-        self.updateBtn = TopIconBarButton(icon=ft.icons.UPDATE)
-        self.themeBtn = TopIconBarButton(
+        self.minimizeBtn = TopBarIconButton(icon=ft.icons.MINIMIZE, on_click=lambda e: self.__minimize())
+        self.closeBtn = TopBarIconButton(icon=ft.icons.CLOSE, on_click=lambda e: self.page.window_close())
+        self.updateBtn = TopBarIconButton(icon=ft.icons.UPDATE)
+        self.themeBtn = TopBarIconButton(
             icon=ft.icons.DARK_MODE if self.page.theme_mode.value == 'light' else ft.icons.LIGHT_MODE,
             on_click=lambda e: self.change_theme('dark' if self.page.theme_mode.value == 'light' else 'light'))
 

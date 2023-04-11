@@ -13,44 +13,21 @@ class App:
         self.page.window_center()
         self.page.theme_mode = ft.ThemeMode.DARK
 
-        # page.fonts = {
-        #     "Mont": "/fonts/mont_heavydemo.ttf"
-        # }
-        # page.theme = ft.Theme(font_family="Mont")
+        page.fonts = {
+            "MontLight": "/fonts/mont_extralightdemo.ttf",
+            "Mont": "/fonts/mont_heavydemo.ttf"
+        }
+        page.theme = ft.Theme(font_family="Mont")
+        page.dark_theme = ft.Theme(font_family="Mont")
 
         self.TopBar = TopBar(self.page, height=40)
-
-        self.contentPage = ft.Container(expand=1)
-        destinations = [
-            Nav(Title="Интернет", icon=ft.Image(src="icons/icons8-signal-30.png", width=30, height=30),
-                content=EthernetPage()),
-            Nav(Title="Оргтехника", icon=ft.Image(src="icons/icons8-printer-maintenance-30.png", width=30, height=30),
-                content=None),
-            Nav(Title="Склад", icon=ft.Image(src="icons/icons8--30.png", width=30, height=30), content=None),
-            Nav(Title="Настройки", icon=ft.Image(src="icons/icons8-settings-30.png", width=30, height=30),
-                content=None),
-            Nav(Title="Отчёты", icon=ft.Image(src="icons/icons8-pie-chart-report-30.png", width=30, height=30),
-                content=None),
-            # Nav(Title="Панель SA", icon=ft.Image(src="icons/icons8-user-shield-30.png", width=30, height=30),
-            #     content=None)
-        ]
-        self.NavBar = NavBar(self.page, contentPage=self.contentPage, destinations=destinations, bgcolor="#225074",
-                             gradient=ft.LinearGradient(
-                                 begin=ft.alignment.top_left,
-                                 end=ft.Alignment(0.8, 1),
-                                 colors=[
-                                     "0x296299",
-                                     "0x142838",
-                                 ],
-                                 tile_mode=ft.GradientTileMode.MIRROR,
-
-                             ))
+        self.NavBar = NavBar(self.page)
         self.page.add(
-            ft.Stack(controls=[ft.Row(controls=[self.NavBar, self.contentPage], expand=1), self.TopBar], expand=1))
+            ft.Stack(controls=[self.NavBar, self.TopBar], expand=1))
         self.page.update()
 
     def change_theme(self, theme: str):
-        self.TopBar.ButtonsRow.change_theme(theme)
+        self.TopBar.Buttons.change_theme(theme)
 
 
 if __name__ == "__main__":

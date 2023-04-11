@@ -106,9 +106,24 @@ class IPTable(ft.UserControl):
                                     ])
                                 ]))
         self.datatable.rows.extend([self.create_row(status="Online", ping="171 ms."),
-                  self.create_row(status="Offline")])
+                                    self.create_row(status="Offline")])
         return ft.Container(content=ft.Column(controls=[
             ft.Row(controls=[InputRow]),
             ft.Container(content=ft.ListView(controls=[self.datatable], expand=1))
         ],
         ), padding=15, expand=1)
+
+
+class Table(ft.UserControl):
+    def __init__(self):
+        super().__init__()
+
+    def build(self):
+        pass
+
+class InputContainer(ft.UserControl):
+    def __init__(self):
+        super().__init__()
+
+    def build(self):
+        pass
