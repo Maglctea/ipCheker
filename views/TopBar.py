@@ -11,10 +11,11 @@ class TopBar(ft.UserControl):
         self.__page = page
         self.__bgcolor = bgcolor
         self.Buttons = ButtonsRow(self.__page)
+        self.Buttons.height = kwargs["height"]
 
     def build(self):
         drag_area = ft.WindowDragArea(
-            ft.Container(padding=10), expand=1)
+            ft.Container(), expand=1)
         return ft.Container(content=ft.Row(controls=[drag_area, self.Buttons], expand=1), bgcolor=self.__bgcolor)
 
 

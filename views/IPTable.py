@@ -1,4 +1,5 @@
 import flet as ft
+from typing import Optional
 
 
 class IPTable(ft.UserControl):
@@ -114,16 +115,78 @@ class IPTable(ft.UserControl):
         ), padding=15, expand=1)
 
 
-class Table(ft.UserControl):
+class IPTable1(ft.UserControl):
     def __init__(self):
         super().__init__()
+        self.Table = Table(columns=["Название", "IP-Адрес", "Примечания", "Пинг", "Статус"])
+        self.InputContainer = InputContainer()
 
     def build(self):
-        pass
+        return ft.Container(content=ft.Column(controls=[
+            ft.Row(controls=[self.InputContainer]),
+            # ft.Container(content=self.Table, expand=1)
+        ],
+        ), padding=15, expand=1)
+
+
+class Table(ft.UserControl):
+    def __init__(self, columns: list[str]):
+        super().__init__()
+        self.datatable: Optional[ft.DataTable] = None
+        self.__columns = columns
+
+    def build(self):
+        self.datatable = ft.DataTable(columns=[
+            ft.DataColumn(label=ft.Text(value=value)) for value in self.__columns
+        ],
+            show_checkbox_column=True,
+            divider_thickness=1,
+            rows=[],
+            expand=1,
+        )
+        return self.datatable
+
 
 class InputContainer(ft.UserControl):
     def __init__(self):
         super().__init__()
+        self.AddButton = ft.ElevatedButton(text="Добавить")
+        self.SaveButton = ft.ElevatedButton(text="Сохранить", disabled=True)
+        self.DeleteButton = ft.ElevatedButton(text="Удалить")
+
+    def __add_input_field(self, label: str, expand):
+        input_field = ft.TextField(
+            border_color="transparent",
+            height=30,
+            text_size=15,
+            content_padding=0,
+            cursor_color="black",
+            cursor_width=1,
+            cursor_height=18,
+            color="black",
+        )
+
+        return ft.Container(content=ft.Column(
+            spacing=1,
+            controls=[
+                ft.Text(value=label, size=13, color="black", weight=ft.FontWeight.BOLD),
+                input_field
+            ]
+        ),
+            expand=expand,
+            height=60,
+            bgcolor="#ebebeb",
+            border_radius=6,
+            padding=8
+        )
 
     def build(self):
-        pass
+        return ft.Container(border=ft.border.all(1, "#ebebeb"), border_radius=8, padding=15, expand=True,
+                            content=ft.Column(controls=[
+                                ft.Row(controls=[self.__add_input_field("Название", 3),
+                                                 self.__add_input_field("IP-Адрес", 1)]),
+                                ft.Row(controls=[
+                                    self.__add_input_field("Примечания", 1)
+                                ]),
+                                ft.Row(controls=[self.AddButton, self.SaveButton, self.DeleteButton])
+                            ]))
