@@ -1,11 +1,11 @@
 import flet as ft
-from views.IPTable import IPTable1, IPTable
+from views.IPTable import IPTable
 
 
 class EthernetPage(ft.UserControl):
     def __init__(self):
         super().__init__()
-        self.IPTable = IPTable1()
+        self.IPTable = IPTable()
         self.EthernetAdapter = EthernetAdapter()
 
     def build(self):
