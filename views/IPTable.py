@@ -39,11 +39,11 @@ class IPTableRow(ft.UserControl):
     @status.setter
     def status(self, status: bool):
         if status:
-            self.__status.value = "Online"
-            self.__status.color = "green"
+            self.__status.content.value = "Online"
+            self.__status.content.color = "green"
         else:
-            self.__status.value = "Offline"
-            self.__status.color = "red"
+            self.__status.content.value = "Offline"
+            self.__status.content.color = "red"
         self.update()
 
     def build(self):
@@ -106,7 +106,7 @@ class IPTable(ft.UserControl):
         self.selected = []
         self.Table.datatable.update()
 
-    def create_row(self, name: str, ip: str, notes: str, ping: str = "", status: bool = False,
+    def create_row(self, name: str = "", ip: str = "", notes: str = "", ping: str = "", status: bool = False,
                    on_create: Optional[Callable] = None,
                    on_delete: Optional[Callable] = None):
         return IPTableRow(name=name, ip=ip, notes=notes, ping=ping, status=status, on_create=on_create,

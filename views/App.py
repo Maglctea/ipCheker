@@ -26,6 +26,9 @@ class App:
             ft.Stack(controls=[self.NavBar, self.TopBar], expand=1))
         self.page.update()
 
+        rows = [self.NavBar.Ethernet.content.IPTable.create_row(status=True), self.NavBar.Ethernet.content.IPTable.create_row(status=False)]
+        self.NavBar.Ethernet.content.IPTable.add_rows_to_table(rows)
+
     def change_theme(self, theme: str):
         self.TopBar.Buttons.change_theme(theme)
 
