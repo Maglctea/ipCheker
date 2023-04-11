@@ -230,6 +230,9 @@ class IPTable1(ft.UserControl):
         self.Table.datatable.update()
 
     def __add_row(self):
+        self.InputContainer.SaveButton.disabled = True
+        self.InputContainer.SaveButton.data = None
+        self.InputContainer.SaveButton.update()
         row = self.create_row(name=self.InputContainer.Inputs[0].value, ip=self.InputContainer.Inputs[1].value,
                               notes=self.InputContainer.Inputs[2].value, on_create=self.on_create_row,
                               on_delete=self.on_delete_row)
