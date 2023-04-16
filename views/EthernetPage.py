@@ -1,15 +1,14 @@
 import flet as ft
 from views.IPTable import IPTable
+from Nav import Nav
 
 
-class EthernetPage(ft.UserControl):
-    def __init__(self):
-        super().__init__()
+class EthernetPage(Nav):
+    def __init__(self, title, icon_src):
+        super().__init__(title=title, icon_src=icon_src)
         self.IPTable = IPTable()
         self.EthernetAdapter = EthernetAdapter()
-
-    def build(self):
-        return ft.Container(content=ft.Column(controls=[self.EthernetAdapter, self.IPTable]), expand=1)
+        self.data = ft.Container(content=ft.Column(controls=[self.EthernetAdapter, self.IPTable]), expand=1)
 
 
 class EthernetAdapter(ft.UserControl):
