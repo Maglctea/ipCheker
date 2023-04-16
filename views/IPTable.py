@@ -7,7 +7,6 @@ class IPTableRow(ft.DataRow):
                  on_select: Optional[Callable] = None,
                  on_long_press: Optional[Callable] = None):
         super().__init__(on_select_changed=on_select, on_long_press=on_long_press)
-        self._row = None
         self.__name = ft.DataCell(ft.Text(value=name, font_family="default"))
         self.__ip = ft.DataCell(ft.Text(value=ip, font_family="default"))
         self.__notes = ft.DataCell(ft.Text(value=notes, font_family="default"))
@@ -27,29 +26,29 @@ class IPTableRow(ft.DataRow):
 
     @property
     def ip(self):
-        return self.__name.content.value
+        return self.__ip.content.value
 
     @ip.setter
     def ip(self, name):
-        self.__name.content.value = name
+        self.__ip.content.value = name
         self.update()
 
     @property
     def notes(self):
-        return self.__name.content.value
+        return self.__notes.content.value
 
     @notes.setter
     def notes(self, name):
-        self.__name.content.value = name
+        self.__notes.content.value = name
         self.update()
 
     @property
     def ping(self):
-        return self.__name.content.value
+        return self.__ping.content.value
 
     @ping.setter
     def ping(self, name):
-        self.__name.content.value = name
+        self.__ping.content.value = name
         self.update()
 
     @property
@@ -73,19 +72,18 @@ class IPTable(ft.UserControl):
         self.Table = Table(columns=["Название", "IP-Адрес", "Примечания", "Пинг", "Статус"])
         self.InputContainer = InputContainer()
         self.selected = []
-        self.on_create_row: Optional[Callable] = None
-        self.on_delete_row: Optional[Callable] = None
 
-        self.InputContainer.AddButton.on_click = lambda e: self.add_row()
-        self.InputContainer.DeleteButton.on_click = lambda e: self.delete_selected()
+        self.InputContainer.AddButton.on_click = self.add_row
+        self.InputContainer.DeleteButton.on_click = self.delete_selected
         self.InputContainer.SaveButton.on_click = self.__save_changes
 
     def __save_changes(self, e):
         e.control.disabled = True
         row = e.control.data
-        row.name = self.InputContainer.NameInput.value
-        row.ip = self.InputContainer.IpInput.value
-        row.notes = self.InputContainer.NotesInput.value
+        if row in self.Table.rows:
+            row.name = self.InputContainer.NameInput.value
+            row.ip = self.InputContainer.IpInput.value
+            row.notes = self.InputContainer.NotesInput.value
         e.control.data = None
         e.control.update()
 
@@ -105,26 +103,23 @@ class IPTable(ft.UserControl):
             self.selected.remove(e.control)
         e.control.update()
 
-    def delete_selected(self):
+    def delete_selected(self, e):
         for row in self.selected:
             self.Table.rows.remove(row)
         self.selected = []
         self.Table.update()
 
-    def add_rows_to_table(self, rows: list[IPTableRow]):
-        self.Table.rows.extend([row for row in rows])
-        self.Table.update()
-
-    def add_row(self):
+    def add_row(self, e):
         self.InputContainer.SaveButton.disabled = True
         self.InputContainer.SaveButton.data = None
         self.InputContainer.SaveButton.update()
-        row = IPTableRow(name=self.InputContainer.NameInput.TextField.value,
-                         ip=self.InputContainer.IpInput.TextField.value,
-                         notes=self.InputContainer.NotesInput.TextField.value,
+        row = IPTableRow(name=self.InputContainer.NameInput.value,
+                         ip=self.InputContainer.IpInput.value,
+                         notes=self.InputContainer.NotesInput.value,
                          on_select=self.__on_select,
                          on_long_press=self.__on_change)
-        self.add_rows_to_table([row])
+        self.Table.rows.append(row)
+        self.Table.update()
 
     def build(self):
         return ft.Container(content=ft.Column(controls=[
@@ -148,18 +143,7 @@ class InputRow(ft.UserControl):
         super().__init__()
         self.expand = expand
         self.label = label
-
-    @property
-    def value(self):
-        return self.TextField.value
-
-    @value.setter
-    def value(self, value):
-        self.TextField.value = value
-        self.TextField.update()
-
-    def build(self):
-        self.TextField = ft.TextField(
+        self.__TextField = ft.TextField(
             border_color="transparent",
             height=30,
             text_size=15,
@@ -171,11 +155,21 @@ class InputRow(ft.UserControl):
             text_style=ft.TextStyle(font_family="default")
         )
 
+    @property
+    def value(self):
+        return self.__TextField.value
+
+    @value.setter
+    def value(self, value):
+        self.__TextField.value = value
+        self.__TextField.update()
+
+    def build(self):
         return ft.Container(content=ft.Column(
             spacing=1,
             controls=[
                 ft.Text(value=self.label, size=13, color="black", weight=ft.FontWeight.BOLD),
-                self.TextField
+                self.__TextField
             ]
         ),
             expand=self.expand,
