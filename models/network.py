@@ -36,6 +36,7 @@ class Network(Base):
             return s.query(Network).filter_by(address_network=address_network).first()
 
 Base.metadata.create_all(engine)
-print(Network.get('127.0.0.1'))
-print(Network.get('*', True))
-# Network.add('name', '127.0.0.2', 'description') # Добавить ip в бд
+# Network.add('name', '127.0.0.2', 'description') # Добавит ip в бд
+
+# print(Network.get('127.0.0.1')) # Получение сети из бд по ip
+# print(Network.get('*', True)) # Получение всех сетей из бд
