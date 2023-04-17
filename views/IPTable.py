@@ -70,12 +70,8 @@ class IPTable(ft.UserControl):
     def __init__(self):
         super().__init__()
         self.Table = Table(columns=["Название", "IP-Адрес", "Примечания", "Пинг", "Статус"])
-        self.InputContainer = InputContainer()
+        self.InputContainer = InputContainer(self.add_row, self.__save_changes, self.delete_selected)
         self.selected = []
-
-        self.InputContainer.AddButton.on_click = self.add_row
-        self.InputContainer.DeleteButton.on_click = self.delete_selected
-        self.InputContainer.SaveButton.on_click = self.__save_changes
 
     def __save_changes(self, e):
         e.control.disabled = True
@@ -181,17 +177,19 @@ class InputRow(ft.UserControl):
 
 
 class InputContainer(ft.UserControl):
-    def __init__(self):
+    def __init__(self, on_add, on_save, on_delete):
         super().__init__()
-        self.AddButton = ft.ElevatedButton(text="Добавить")
-        self.SaveButton = ft.ElevatedButton(text="Сохранить", disabled=True)
-        self.DeleteButton = ft.ElevatedButton(text="Удалить")
-
+        self.__on_add = on_add
+        self.__on_save = on_save
+        self.__on_delete = on_delete
         self.NameInput = InputRow("Название", expand=3)
         self.IpInput = InputRow("IP-Адрес", expand=1)
         self.NotesInput = InputRow("Примечания", expand=1)
 
     def build(self):
+        self.AddButton = ft.ElevatedButton(text="Добавить", on_click=self.__on_add)
+        self.SaveButton = ft.ElevatedButton(text="Сохранить", disabled=True, on_click=self.__on_save)
+        self.DeleteButton = ft.ElevatedButton(text="Удалить", on_click=self.__on_delete)
         return ft.Container(border=ft.border.all(1, "#ebebeb"), border_radius=8, padding=15, expand=True,
                             content=ft.Column(controls=[
                                 ft.Row(controls=[self.NameInput, self.IpInput]),
