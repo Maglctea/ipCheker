@@ -1,5 +1,11 @@
+import threading
+from time import sleep
+
 import flet as ft
 from typing import Optional, Callable
+
+from controller.ping import ping_host
+from models.network import Network
 
 
 class IPTableRow(ft.DataRow):
@@ -105,7 +111,16 @@ class IPTable(ft.UserControl):
         self.selected = []
         self.Table.update()
 
-    def add_row(self, e):
+    def ip_status(self, row: IPTableRow):
+        try:
+            while True:
+                result = ping_host(row.ip)
+                row.ping = result['ping']
+                row.status = result['status']
+        except Exception:
+            return
+
+    def add_row(self, e, setup=False):
         self.InputContainer.SaveButton.disabled = True
         self.InputContainer.SaveButton.data = None
         self.InputContainer.SaveButton.update()
@@ -116,6 +131,10 @@ class IPTable(ft.UserControl):
                          on_long_press=self.__on_change)
         self.Table.rows.append(row)
         self.Table.update()
+        if not setup:
+            Network.add(row.name, row.ip, row.notes) # Добавит ip в бд
+        thread = threading.Thread(target=lambda: self.ip_status(row))
+        thread.start()
 
     def build(self):
         return ft.Container(content=ft.Column(controls=[
