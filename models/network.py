@@ -8,6 +8,7 @@ engine = create_engine('sqlite:///../ipChecker.sqlite', echo=False)
 session = sessionmaker(bind=engine)
 s: Session = session()
 
+
 class Network(Base):
     __tablename__ = 'network'
 
@@ -21,10 +22,16 @@ class Network(Base):
 
     @staticmethod
     def add(name_network, address_network, description_network):
-        network = Network(name_network=name_network, address_network=address_network, description_network=description_network)
+        network = Network(name_network=name_network, address_network=address_network,
+                          description_network=description_network)
         s.add(network)
         s.commit()
         return network
+
+    @staticmethod
+    def delete(address_network):
+        s.query(Network).filter_by(address_network=address_network).delete()
+        s.commit()
 
     @staticmethod
     def get(address_network, many=False):
@@ -34,6 +41,7 @@ class Network(Base):
             return s.query(Network).filter_by(address_network=address_network).all()
         else:
             return s.query(Network).filter_by(address_network=address_network).first()
+
 
 Base.metadata.create_all(engine)
 # Network.add('name', '127.0.0.2', 'description') # Добавит ip в бд

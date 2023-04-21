@@ -1,7 +1,6 @@
 import flet as ft
-from views.EthernetPage import EthernetPage
 from views.TopBar import TopBar
-from views.NavBar import NavBar, Nav
+from views.NavBar import NavBar
 
 
 class App:

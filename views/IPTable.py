@@ -11,15 +11,30 @@ from models.network import Network
 class IPTableRow(ft.DataRow):
     def __init__(self, name: str, ip: str, notes: str,
                  on_select: Optional[Callable] = None,
-                 on_long_press: Optional[Callable] = None):
-        super().__init__(on_select_changed=on_select, on_long_press=on_long_press)
+                 on_long_press: Optional[Callable] = None,
+                 ):
+        super().__init__()
+        self.id = None
         self.__name = ft.DataCell(ft.Text(value=name, font_family="default"))
         self.__ip = ft.DataCell(ft.Text(value=ip, font_family="default"))
         self.__notes = ft.DataCell(ft.Text(value=notes, font_family="default"))
         self.__ping = ft.DataCell(ft.Text(value="", font_family="default"))
-        self.__status = ft.DataCell(ft.Text(value="Offline", color="red"))
+        self.__status = ft.DataCell(ft.Text(value="Undefined", color="default", text_align=ft.TextAlign.CENTER))
+        self.__on_select_changed = on_select
+        self.__on_long_press = on_long_press
+        self.__cells = [self.__name, self.__ip, self.__notes, self.__ping, self.__status]
+        self.__running = False
 
-        self.cells = [self.__name, self.__ip, self.__notes, self.__ping, self.__status]
+    def did_mount(self):
+        self.cells = self.__cells
+        self.on_long_press = self.__on_long_press
+        self.on_select_changed = self.__on_select_changed
+        self.update()
+        thread = threading.Thread(target=lambda: self.ip_status())
+        thread.start()
+
+    def will_unmount(self):
+        self.__running = False
 
     @property
     def name(self):
@@ -58,18 +73,31 @@ class IPTableRow(ft.DataRow):
         self.update()
 
     @property
-    def status(self) -> bool:
-        return True if self.__status.content.value == "Online" else False
+    def status(self) -> Optional[bool]:
+        return True if self.__status.content.value == "Online" else False if self.__status.content.value == "Offline" else None
 
     @status.setter
-    def status(self, status: bool):
+    def status(self, status: Optional[bool]):
         if status:
             self.__status.content.value = "Online"
             self.__status.content.color = "green"
-        else:
+        elif not status:
             self.__status.content.value = "Offline"
             self.__status.content.color = "red"
+        else:
+            self.__status.content.value = "Undefined"
         self.update()
+
+    def ip_status(self):
+        self.__running = True
+        try:
+            while self.__running:
+                result = ping_host(self.ip)
+                self.ping = result['ping']
+                self.status = result['status']
+                # Задержку надо бы наверное?
+        except Exception:
+            return
 
 
 class IPTable(ft.UserControl):
@@ -79,13 +107,25 @@ class IPTable(ft.UserControl):
         self.InputContainer = InputContainer(self.add_row, self.__save_changes, self.delete_selected)
         self.selected = []
 
+        self.Table.rows = [IPTableRow(name=row.name_network,
+                                      ip=row.address_network,
+                                      notes=row.description_network,
+                                      on_select=self.__on_select,
+                                      on_long_press=self.__on_change) for row in Network.get("*")
+                           ]
+
     def __save_changes(self, e):
         e.control.disabled = True
         row = e.control.data
         if row in self.Table.rows:
+            previous_ip = row.ip
+
             row.name = self.InputContainer.NameInput.value
             row.ip = self.InputContainer.IpInput.value
             row.notes = self.InputContainer.NotesInput.value
+
+            # Здесь нужно записать изменения в бд
+
         e.control.data = None
         e.control.update()
 
@@ -107,20 +147,12 @@ class IPTable(ft.UserControl):
 
     def delete_selected(self, e):
         for row in self.selected:
+            Network.delete(row.ip)
             self.Table.rows.remove(row)
         self.selected = []
         self.Table.update()
 
-    def ip_status(self, row: IPTableRow):
-        try:
-            while True:
-                result = ping_host(row.ip)
-                row.ping = result['ping']
-                row.status = result['status']
-        except Exception:
-            return
-
-    def add_row(self, e, setup=False):
+    def add_row(self, event=None):
         self.InputContainer.SaveButton.disabled = True
         self.InputContainer.SaveButton.data = None
         self.InputContainer.SaveButton.update()
@@ -129,12 +161,12 @@ class IPTable(ft.UserControl):
                          notes=self.InputContainer.NotesInput.value,
                          on_select=self.__on_select,
                          on_long_press=self.__on_change)
-        self.Table.rows.append(row)
-        self.Table.update()
-        if not setup:
-            Network.add(row.name, row.ip, row.notes) # Добавит ip в бд
-        thread = threading.Thread(target=lambda: self.ip_status(row))
-        thread.start()
+        try:
+            Network.add(row.name, row.ip, row.notes)
+            self.Table.rows.append(row)
+            self.Table.update()
+        except Exception as e:
+            print(e)
 
     def build(self):
         return ft.Container(content=ft.Column(controls=[
@@ -201,8 +233,8 @@ class InputContainer(ft.UserControl):
         self.__on_add = on_add
         self.__on_save = on_save
         self.__on_delete = on_delete
-        self.NameInput = InputRow("Название", expand=3)
-        self.IpInput = InputRow("IP-Адрес", expand=1)
+        self.NameInput = InputRow("Название*", expand=3)
+        self.IpInput = InputRow("IP-Адрес*", expand=1)
         self.NotesInput = InputRow("Примечания", expand=1)
 
     def build(self):
