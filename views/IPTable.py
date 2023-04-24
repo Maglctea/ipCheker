@@ -116,6 +116,7 @@ class IPTable(ft.UserControl):
 
     def __save_changes(self, e):
         e.control.disabled = True
+        old_ip = e.control.data.ip
         row = e.control.data
         if row in self.Table.rows:
             previous_ip = row.ip
@@ -125,6 +126,7 @@ class IPTable(ft.UserControl):
             row.notes = self.InputContainer.NotesInput.value
 
             # Здесь нужно записать изменения в бд
+            Network.update(old_ip, row.name, row.ip, row.notes)
 
         e.control.data = None
         e.control.update()

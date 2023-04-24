@@ -1,4 +1,8 @@
+import threading
+
 import flet as ft
+
+from controller.speed import get_internet_speed
 from views.IPTable import IPTable
 from Nav import Nav
 
@@ -16,6 +20,15 @@ class EthernetAdapter(ft.UserControl):
         super().__init__()
         self._adapter = ft.Text(value=adapter)
         self._ethernet_speed = ft.Text(value=ethernet_speed)
+
+        thread = threading.Thread(target=lambda: self.speed_control())
+        thread.start()
+
+    def speed_control(self):
+        while True:
+            speed = get_internet_speed()
+            if speed:
+                self.ethernet_speed = f'Загрузка: {speed["download"]:.2f} mbps | Выгрузка: {speed["upload"]:.2f} mbps'
 
     @property
     def adapter(self):

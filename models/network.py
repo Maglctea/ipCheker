@@ -42,9 +42,25 @@ class Network(Base):
         else:
             return s.query(Network).filter_by(address_network=address_network).first()
 
+    @staticmethod
+    def update(current_address_network, name_network=None, address_network=None, description_network=None):
+        network = Network.get(current_address_network)
+        if network:
+            if name_network:
+                network.name_network = name_network
+            if address_network:
+                network.address_network = address_network
+            if description_network:
+                network.description_network = description_network
+            s.commit()
+            return True
+        return False
+
+
 
 Base.metadata.create_all(engine)
 # Network.add('name', '127.0.0.2', 'description') # Добавит ip в бд
 
 # print(Network.get('127.0.0.1')) # Получение сети из бд по ip
 # print(Network.get('*', True)) # Получение всех сетей из бд
+# Network.edit('127.0.0.1', address_network='127.0.0.5')
